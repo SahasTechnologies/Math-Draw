@@ -14,7 +14,7 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #6aa3ff;
   text-decoration: inherit;
 }
 
@@ -41,8 +41,8 @@ button {
 }
 button:focus,
 button:focus-visible {
-  outline: 2px solid #646cff;
-  outline-offset: 2px;
+  outline: none;
+  outline-offset: 0;
 }
 
 @media (prefers-color-scheme: light) {

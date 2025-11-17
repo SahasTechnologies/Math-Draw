@@ -5,6 +5,15 @@
   overflow: hidden; /* much easier than typescript */
 }
 
+.app-container.pan-mode{
+  cursor:grab
+}
+
+.app-container.pan-mode:active {
+  cursor:grabbing;
+}
+
+
 .dotted-background {
   position: absolute;
   inset:0;
@@ -20,40 +29,63 @@
 
 
 .sidebar {
-  position:fixed; /* might make it draggable once i have the funda sorted*/
-  left: 20px;
-  top: 50%; /*🔝 (yes im this bored   ;-)   )*/
-  background-color: rgba(255, 255, 255, 0.9);
+  position:fixed;
+  background-color: #ffffff;
   box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
   z-index: 10;
-  transform: translateY(-50%);
   border-radius: 50px;
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: center;
+  user-select: none;
 }
 
 .sidebar-button {
   width:48px;
   height:48px;
   border-radius:50%;
-  border: none;
+  border: none !important;
   background-color:transparent;
   align-items: center;
   justify-content:center;
   transition: background-color 0.2s;
   cursor: pointer;
   display: flex;
-  color: #333333
+  flex-shrink: 0;
+  color: #333333;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-appearance: none;
+  appearance:none;
+  overflow:hidden
 
+
+
+}
+
+.sidebar-button,
+.sidebar-button:focus,
+.sidebar-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .sidebar-button:hover {
-  background-color: rgba(100, 108, 255, 0.1);
+  background-color: rgba(106, 163, 255, 0.12);
 }
-.sidebar-button:active {
-  background-color: rgba(100,108,255,0,2);
+.sidebar-button:active,
+.sidebar-button-active {
+  background-color: rgba(106, 163, 255, 0.18);
+
+}
+
+.sidebar-button:hover,
+.sidebar-button:active,
+.sidebar-button:focus,
+.sidebar-button:focus-visible {
+        border-radius: 50% !important
 }
 
 .canvas-area {
@@ -65,18 +97,39 @@
 
 .zoom-controls {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
   border-radius:50px;
   padding: 12px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: #ffffff;
   gap: 8px;
   z-index:10;
+  user-select: none;
+  overflow:hidden
 }
 
+
+.zoom-controls-bg {
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background-color:transparent;
+  pointer-events:none;
+  z-index:-1
+}
+
+.sidebar,
+.zoom-controls {
+  cursor: default;
+}
+
+
+.sidebar:active,
+.zoom-controls:active{
+      cursor: default;
+}
 
 .zoom-button {
   width: 48px;
@@ -85,22 +138,110 @@
   background-color: transparent;
   cursor: pointer;
   justify-content: center;
-  border: none;
+  border: none !important;
   display: flex;
   align-items: center;
   transition: background-color 0.2s;
-  color: #333333
+  color: #333333;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-appearance:none;
+  appearance:none;
+  overflow:hidden
+}
+
+
+.zoom-button:hover,
+.zoom-button:active,
+.zoom-button:focus,
+.zoom-button:focus-visible {
+  border-radius: 50% !important
+}
+
+.pill-drag-handle {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:grab;
+  color:inherit;
+  user-select: none;
+  width:32px; height:32px;
+  border-radius: 50%;
+  background-color: rgba(0,0,0,0.4);
+  transition: background-color 0.2s
+
+}
+.pill-drag-handle:hover  {
+    background-color: rgba(100,108,255,0.08);
+}
+
+.pill-drag-handle:active {
+  cursor:grabbing;
+  background-color: rgba(100,  108,  255, 0.16)
+}
+
+.pill-drag-handle-vertical{
+    margin-top:8px;
+    align-self:center;
+}
+
+.pill-drag-handle-horizontal{margin-right:8px}
+.pill-drag-icon-horizontal{transform:rotate(90deg)}
+
+.zoom-distance-label {
+  margin-right: 12px;
+  font-size:14px;
+  color: #333333;
+  white-space:nowrap;
+  cursor: pointer;
+}
+.zoom-scale-input {
+  width: 80px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.15);
+  background-color: transparent;
+  color: #333333;
+  font-size: 14px;
+  outline: none;
 }
 .zoom-button:hover {background-color: rgba(100, 108, 255, 0.1)} /* wait this is so much more efficient writing the code when you dont press enter after typing { */;
-.zoom-button:active{background-color: rgba(100, 108, 255, 0,2)} /* so much neater when its all in one line but im not bothered to fix the  ones earlier*/;
+.zoom-button:active{background-color: rgba(106, 163, 255, 0.2)} /* so much neater when its all in one line but im not bothered to fix the  ones earlier*/;
+
 
 .dark .dotted-background {background-image: radial-gradient(circle, #666666 1px, transparent 1px)};
-.dark .sidebar {background-color: rgba(30, 30, 30, 0.9)}
+.dark .sidebar {background-color: #000000 !important;}
+html.dark .sidebar {background-color: #000000 !important;}
 .dark .sidebar-button {color: #ffffff} /* tbh looking back at this, it looks much harder to debug if its like this, makes it much harder to read */;
-.dark .sidebar-button:hover {background-color: rgba(100, 108, 255, 0,2)};
-.dark .sidebar-button:active {background-color: rgba(100,108,255,0.3)}
-.dark .zoom-controls {background-color: rgba(30, 30, 30, 0.9)};
+.dark .sidebar-button:hover {background-color: rgba(106, 163, 255, 0.24)};
+.dark .sidebar-button:active,
+.dark .sidebar-button-active {background-color: #000000};
+.dark .zoom-controls {background-color: #000000 !important}; /*just pls be dark in dark mode, i even made u important */
+html.dark .zoom-controls {background-color: #000000 !important;}
 .dark .zoom-button { color: #ffffff};
-.dark .zoom-button:hover {background-color: rgba(100, 100, 255, 0.2)}
-.dark .zoom-button:active {background-color:rgba(100,108,255,0,3)};
+.dark .zoom-distance-label { color: #ffffff; background-color: #000000; padding: 4px 8px; border-radius: 999px;};
+.dark .zoom-scale-input {
+  border-color: rgba(255,255,255,0.25);
+  color: #ffffff;
+  background-color: #000000;
+}
+.dark .pill-drag-handle { color: #ffffff; background-color: rgba(255,255,255,0.04)};
+.dark .pill-drag-handle:hover { background-color: rgba(100,108,255,0.24)};
+.dark .pill-drag-handle:active { background-color: rgba(100,108,255,0.32)};
+.dark .zoom-button:hover {background-color: rgba(106,163,255,0.24)}
+.dark .zoom-button:active {background-color:rgba(106,163,255,0.32)};
+/*.dark .sidebar {background-color: 000000 !important;}
+.dark .zoom-controls {background-color: #000000}
+.dark .zoom-button{color:#ffffff;}*/
+.dark .zoom-button svg{stroke: #ffffff}
+.dark .zoom-distance-label,
+.dark .zoom-distance-label * {color: #ffffff;}
 /* i cant make up my mind on whether this one line thing makes the overall code look better or worse... */
+
+.app-container .sidebar-button:focus,
+.app-container .sidebar-button:focus-visible,
+.app-container .zoom-button:focus,
+.app-container .zoom-button:focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+}
