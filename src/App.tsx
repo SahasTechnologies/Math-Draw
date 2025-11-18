@@ -11,7 +11,21 @@ import './App.css'
 
 
 
+function getPointName(index: number) {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  const length = alphabet.length
+  let name = ''
+  let n = index
+  do {
+    const remainder = n % length
+    name = alphabet[remainder] + name
+    n = Math.floor(n / length) - 1
+  } while (n >= 0)
+  return name
+}
+
 function App() {
+
   const [viewState, setViewState] = useState({ zoom: 1, pan: { x: 0, y: 0 } })
   const [ isDark, setIsDark] =  useState(prefersDark)
   const mainContainerRef = useRef<HTMLDivElement>(null)
@@ -27,6 +41,9 @@ function App() {
   } ))
 
   const [isPanMode, setIsPanMode] = useState(false)
+  const [activeTool, setActiveTool] = useState<string | null>(null)
+
+  const [points, setPoints] = useState<{ id: number; name: string; x: number; y: number }[]>([])
 
   const dragInfoRef = useRef<{
     target: 'sidebar' | 'zoom' | null
@@ -139,20 +156,45 @@ function App() {
   }, [handlePanMove])
 
   const handleCanvasMouseDown =  (event:any) => {
-    if (!isPanMode) return
+    const container = mainContainerRef.current
+    if (!container) return
 
-    event.preventDefault()
+    if (isPanMode) {
+      event.preventDefault()
 
-    panInfoRef.current = {
-      isPanning: true,
-      startX: event.clientX,
-      startY: event.clientY,
-      startPanX: viewState.pan.x,
-      startPanY: viewState.pan.y,
+      panInfoRef.current = {
+        isPanning: true,
+        startX: event.clientX,
+        startY: event.clientY,
+        startPanX: viewState.pan.x,
+        startPanY: viewState.pan.y,
+      }
+
+      window.addEventListener('mousemove' , handlePanMove)
+      window.addEventListener('mouseup' , handlePanEnd)
+
+      return
     }
 
-    window.addEventListener('mousemove' , handlePanMove)
-    window.addEventListener('mouseup' , handlePanEnd)
+    if (activeTool === 'point') {
+      const rect = container.getBoundingClientRect()
+      const localX = event.clientX - rect.left
+      const localY = event.clientY - rect.top
+
+      const gridSpacing = 20 * viewState.zoom
+
+      const worldX = Math.round((localX - viewState.pan.x) / gridSpacing)
+      const worldY = Math.round((localY - viewState.pan.y) / gridSpacing)
+
+      setPoints((prevPoints) => {
+        const index = prevPoints.length
+        const name = getPointName(index)
+        return [
+          ...prevPoints,
+          { id: index, name, x: worldX, y: worldY },
+        ]
+      })
+    }
   }
 
 
@@ -333,6 +375,26 @@ function App() {
     }
   }
 
+  const handlePanButtonClick = () => {
+    setIsPanMode((prev) => {
+      const next = !prev
+      if (next) {
+        setActiveTool(null)
+      }
+      return next
+    })
+  }
+
+  const handlePointToolClick = () => {
+    setActiveTool((prev) => {
+      const next = prev === 'point' ? null : 'point'
+      if (next) {
+        setIsPanMode(false)
+      }
+      return next
+    })
+  }
+
   return (
     <div
       className={`app-container ${isPanMode ? 'pan-mode' : ''}`}
@@ -356,13 +418,17 @@ function App() {
         </button>
         <button
           className={`sidebar-button sidebar-button-${isPanMode ? 'active' : ''}`}
-          onClick={() => setIsPanMode((prev) => !prev)}
+          onClick={handlePanButtonClick}
         >
           <Hand size={22} />
         </button>
-        <button className="sidebar-button" onClick={() => {}}>
+        <button
+          className={`sidebar-button sidebar-button-${activeTool === 'point' ? 'active' : ''}`}
+          onClick={handlePointToolClick}
+        >
           <CircleDot size={20} />
         </button>
+
         <button className="sidebar-button" onClick={toggleTheme}>
           {isDark ? <Sun size={24} /> : <Moon size={24} />}
         </button>
@@ -416,11 +482,31 @@ function App() {
         </button>
       </div>
 
-      <div className="canvas-area"></div>
+      <div className="canvas-area">
+        {points.map((point) => {
+          const spacing = gridSpacingPx
+          const screenX = viewState.pan.x + point.x * spacing
+          const screenY = viewState.pan.y + point.y * spacing
+
+          return (
+            <div
+              key={point.id}
+              className="point-marker"
+              style={{
+                left: screenX,
+                top: screenY,
+              }}
+            >
+              <div className="point-dot" />
+              <div className="point-label">{point.name}</div>
+            </div>
+          )
+        })}
+      </div>
+
     </div>
   )
 }
 
 export default App
-
 //who decided the syntax for this
